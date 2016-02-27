@@ -23,10 +23,10 @@
     <version>2</version>
   </parent>
 
-  <artifactId>connector-starter-parent</artifactId>
+  <artifactId>slackbot-javaee-connector-parent</artifactId>
   <packaging>pom</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>Connector Starter Project with Security</name>
+  <name>Slack Java EE Connector</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -65,10 +65,10 @@
     </dependencies>
   </dependencyManagement>
   <modules>
-    <module>connector-starter-api</module>
-    <module>connector-starter-impl</module>
-    <module>connector-starter-rar</module>
-    <module>connector-starter-sample-war</module>
+    <module>slackbot-javaee-connector-api</module>
+    <module>slackbot-javaee-connector-impl</module>
+    <module>slackbot-javaee-connector-rar</module>
+    <module>slackbot-javaee-connector-sample-war</module>
   </modules>
   <build>
     <defaultGoal>install</defaultGoal>
