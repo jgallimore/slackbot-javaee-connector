@@ -18,8 +18,8 @@
  */
 package org.tomitribe.slackbot.adapter;
 
-import org.tomitribe.slackbot.api.SampleConnection;
-import org.tomitribe.slackbot.api.SampleConnectionFactory;
+import org.tomitribe.slackbot.api.SlackConnection;
+import org.tomitribe.slackbot.api.SlackConnectionFactory;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -38,27 +38,27 @@ import javax.resource.spi.ResourceAdapterAssociation;
 
 import javax.security.auth.Subject;
 
-@ConnectionDefinition(connectionFactory = SampleConnectionFactory.class,
-        connectionFactoryImpl = SampleConnectionFactoryImpl.class,
-        connection = SampleConnection.class,
-        connectionImpl = SampleConnectionImpl.class)
-public class SampleManagedConnectionFactory implements ManagedConnectionFactory, ResourceAdapterAssociation {
+@ConnectionDefinition(connectionFactory = SlackConnectionFactory.class,
+        connectionFactoryImpl = SlackConnectionFactoryImpl.class,
+        connection = SlackConnection.class,
+        connectionImpl = SlackConnectionImpl.class)
+public class SlackManagedConnectionFactory implements ManagedConnectionFactory, ResourceAdapterAssociation {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger.getLogger(SampleManagedConnectionFactory.class.getName());
+    private static Logger log = Logger.getLogger(SlackManagedConnectionFactory.class.getName());
 
     private ResourceAdapter ra;
 
     private PrintWriter logwriter;
 
-    public SampleManagedConnectionFactory() {
+    public SlackManagedConnectionFactory() {
 
     }
 
     public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         log.finest("createConnectionFactory()");
-        return new SampleConnectionFactoryImpl(this, cxManager);
+        return new SlackConnectionFactoryImpl(this, cxManager);
     }
 
     public Object createConnectionFactory() throws ResourceException {
@@ -68,7 +68,7 @@ public class SampleManagedConnectionFactory implements ManagedConnectionFactory,
     public ManagedConnection createManagedConnection(Subject subject,
                                                      ConnectionRequestInfo cxRequestInfo) throws ResourceException {
         log.finest("createManagedConnection()");
-        return new SampleManagedConnection(this);
+        return new SlackManagedConnection(this);
     }
 
     public ManagedConnection matchManagedConnections(Set connectionSet,
@@ -78,7 +78,7 @@ public class SampleManagedConnectionFactory implements ManagedConnectionFactory,
         Iterator it = connectionSet.iterator();
         while (result == null && it.hasNext()) {
             ManagedConnection mc = (ManagedConnection) it.next();
-            if (mc instanceof SampleManagedConnection) {
+            if (mc instanceof SlackManagedConnection) {
                 result = mc;
             }
 

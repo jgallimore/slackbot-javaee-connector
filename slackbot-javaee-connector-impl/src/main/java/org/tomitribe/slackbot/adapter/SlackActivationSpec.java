@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Activation(messageListeners = InboundListener.class)
-public class SampleActivationSpec implements ActivationSpec {
+public class SlackActivationSpec implements ActivationSpec {
 
     private ResourceAdapter resourceAdapter;
     private Class beanClass;

@@ -16,8 +16,8 @@
  */
 package org.superbiz;
 
-import org.tomitribe.slackbot.api.SampleConnection;
-import org.tomitribe.slackbot.api.SampleConnectionFactory;
+import org.tomitribe.slackbot.api.SlackConnection;
+import org.tomitribe.slackbot.api.SlackConnectionFactory;
 
 import javax.annotation.Resource;
 import javax.ejb.Lock;
@@ -36,14 +36,14 @@ import javax.ws.rs.core.MediaType;
 public class Sender {
 
     @Resource
-    private SampleConnectionFactory cf;
+    private SlackConnectionFactory cf;
 
     @Path("{channel}")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     public void sendMessage(@PathParam("channel") final String channel, final String message) {
         try {
-            final SampleConnection connection = cf.getConnection();
+            final SlackConnection connection = cf.getConnection();
             connection.sendMessage(channel, message);
             connection.close();
         } catch (ResourceException e) {

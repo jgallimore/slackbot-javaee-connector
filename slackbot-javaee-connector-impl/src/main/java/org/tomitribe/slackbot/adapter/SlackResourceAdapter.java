@@ -55,8 +55,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Connector(description = "Sample Resource Adapter", displayName = "Sample Resource Adapter", eisType = "Sample Resource Adapter", version = "1.0")
-public class    SampleResourceAdapter implements ResourceAdapter, EventListener {
-    final Map<SampleActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<SampleActivationSpec, EndpointTarget>();
+public class SlackResourceAdapter implements ResourceAdapter, EventListener {
+    final Map<SlackActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<SlackActivationSpec, EndpointTarget>();
 
     @ConfigProperty
     private String token;
@@ -91,7 +91,7 @@ public class    SampleResourceAdapter implements ResourceAdapter, EventListener 
     public void endpointActivation(final MessageEndpointFactory messageEndpointFactory, final ActivationSpec activationSpec)
             throws ResourceException
     {
-        final SampleActivationSpec telnetActivationSpec = (SampleActivationSpec) activationSpec;
+        final SlackActivationSpec telnetActivationSpec = (SlackActivationSpec) activationSpec;
 
         workManager.scheduleWork(new Work() {
 
@@ -125,7 +125,7 @@ public class    SampleResourceAdapter implements ResourceAdapter, EventListener 
     }
 
     public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
-        final SampleActivationSpec telnetActivationSpec = (SampleActivationSpec) activationSpec;
+        final SlackActivationSpec telnetActivationSpec = (SlackActivationSpec) activationSpec;
 
         final EndpointTarget endpointTarget = targets.get(telnetActivationSpec);
         if (endpointTarget == null) {

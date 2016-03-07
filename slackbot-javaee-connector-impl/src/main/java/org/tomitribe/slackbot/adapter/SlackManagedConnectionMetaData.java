@@ -24,11 +24,11 @@ import javax.resource.ResourceException;
 
 import javax.resource.spi.ManagedConnectionMetaData;
 
-public class SampleManagedConnectionMetaData implements ManagedConnectionMetaData {
+public class SlackManagedConnectionMetaData implements ManagedConnectionMetaData {
 
-    private static Logger log = Logger.getLogger(SampleManagedConnectionMetaData.class.getName());
+    private static Logger log = Logger.getLogger(SlackManagedConnectionMetaData.class.getName());
 
-    public SampleManagedConnectionMetaData() {
+    public SlackManagedConnectionMetaData() {
 
     }
 

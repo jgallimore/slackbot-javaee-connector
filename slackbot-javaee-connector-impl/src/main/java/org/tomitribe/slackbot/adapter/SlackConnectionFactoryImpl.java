@@ -18,8 +18,8 @@
  */
 package org.tomitribe.slackbot.adapter;
 
-import org.tomitribe.slackbot.api.SampleConnection;
-import org.tomitribe.slackbot.api.SampleConnectionFactory;
+import org.tomitribe.slackbot.api.SlackConnection;
+import org.tomitribe.slackbot.api.SlackConnectionFactory;
 
 import javax.naming.NamingException;
 import javax.naming.Reference;
@@ -27,30 +27,30 @@ import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import java.util.logging.Logger;
 
-public class SampleConnectionFactoryImpl implements SampleConnectionFactory {
+public class SlackConnectionFactoryImpl implements SlackConnectionFactory {
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger.getLogger(SampleConnectionFactoryImpl.class.getName());
+    private static Logger log = Logger.getLogger(SlackConnectionFactoryImpl.class.getName());
 
     private Reference reference;
 
-    private SampleManagedConnectionFactory mcf;
+    private SlackManagedConnectionFactory mcf;
 
     private ConnectionManager connectionManager;
 
-    public SampleConnectionFactoryImpl() {
+    public SlackConnectionFactoryImpl() {
 
     }
 
-    public SampleConnectionFactoryImpl(SampleManagedConnectionFactory mcf, ConnectionManager cxManager) {
+    public SlackConnectionFactoryImpl(SlackManagedConnectionFactory mcf, ConnectionManager cxManager) {
         this.mcf = mcf;
         this.connectionManager = cxManager;
     }
 
     @Override
-    public SampleConnection getConnection() throws ResourceException {
+    public SlackConnection getConnection() throws ResourceException {
         log.finest("getConnection()");
-        return (SampleConnection) connectionManager.allocateConnection(mcf, null);
+        return (SlackConnection) connectionManager.allocateConnection(mcf, null);
     }
 
     @Override

@@ -22,7 +22,7 @@ import javax.resource.Referenceable;
 import javax.resource.ResourceException;
 import java.io.Serializable;
 
-public interface SampleConnectionFactory extends Serializable, Referenceable {
-    public SampleConnection getConnection() throws ResourceException;
+public interface SlackConnectionFactory extends Serializable, Referenceable {
+    public SlackConnection getConnection() throws ResourceException;
 
 }

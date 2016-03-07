@@ -16,29 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.tomitribe.slackbot.adapter;
 
-import org.tomitribe.slackbot.api.SampleConnection;
+package org.tomitribe.slackbot.api;
 
-import java.util.logging.Logger;
+public interface SlackConnection {
+    public void sendMessage(final String channel, final String message);
 
-public class SampleConnectionImpl implements SampleConnection {
-    private static Logger log = Logger.getLogger(SampleConnectionImpl.class.getName());
-
-    private SampleManagedConnection mc;
-
-    private SampleManagedConnectionFactory mcf;
-
-    public SampleConnectionImpl(SampleManagedConnection mc, SampleManagedConnectionFactory mcf) {
-        this.mc = mc;
-        this.mcf = mcf;
-    }
-
-    public void sendMessage(final String channel, final String message) {
-        mc.sendMessage(channel, message);
-    }
-
-    public void close() {
-        mc.closeHandle(this);
-    }
+    public void close();
 }

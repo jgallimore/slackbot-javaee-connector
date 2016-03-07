@@ -27,18 +27,18 @@
         <license-required>false</license-required>
     </license>
     <resourceadapter>
-        <resourceadapter-class>org.tomitribe.slackbot.adapter.SampleResourceAdapter</resourceadapter-class>
+        <resourceadapter-class>org.tomitribe.slackbot.adapter.SlackResourceAdapter</resourceadapter-class>
         <config-property>
             <config-property-name>token</config-property-name>
             <config-property-type>String</config-property-type>
         </config-property>
         <outbound-resourceadapter>
             <connection-definition>
-                <managedconnectionfactory-class>org.tomitribe.slackbot.adapter.SampleManagedConnectionFactory</managedconnectionfactory-class>
-                <connectionfactory-interface>org.tomitribe.slackbot.api.SampleConnectionFactory</connectionfactory-interface>
-                <connectionfactory-impl-class>org.tomitribe.slackbot.adapter.SampleConnectionFactoryImpl</connectionfactory-impl-class>
-                <connection-interface>org.tomitribe.slackbot.api.SampleConnection</connection-interface>
-                <connection-impl-class>org.tomitribe.slackbot.adapter.SampleConnectionImpl</connection-impl-class>
+                <managedconnectionfactory-class>org.tomitribe.slackbot.adapter.SlackManagedConnectionFactory</managedconnectionfactory-class>
+                <connectionfactory-interface>org.tomitribe.slackbot.api.SlackConnectionFactory</connectionfactory-interface>
+                <connectionfactory-impl-class>org.tomitribe.slackbot.adapter.SlackConnectionFactoryImpl</connectionfactory-impl-class>
+                <connection-interface>org.tomitribe.slackbot.api.SlackConnection</connection-interface>
+                <connection-impl-class>org.tomitribe.slackbot.adapter.SlackConnectionImpl</connection-impl-class>
             </connection-definition>
             <transaction-support>NoTransaction</transaction-support>
             <reauthentication-support>false</reauthentication-support>
@@ -48,7 +48,7 @@
                 <messagelistener>
                     <messagelistener-type>org.tomitribe.slackbot.api.InboundListener</messagelistener-type>
                     <activationspec>
-                        <activationspec-class>org.tomitribe.slackbot.adapter.SampleActivationSpec</activationspec-class>
+                        <activationspec-class>org.tomitribe.slackbot.adapter.SlackActivationSpec</activationspec-class>
                     </activationspec>
                 </messagelistener>
             </messageadapter>

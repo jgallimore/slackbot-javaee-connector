@@ -18,7 +18,7 @@
  */
 package org.tomitribe.slackbot.adapter;
 
-import org.tomitribe.slackbot.api.SampleConnection;
+import org.tomitribe.slackbot.api.SlackConnection;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -36,19 +36,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class SampleManagedConnection implements ManagedConnection {
+public class SlackManagedConnection implements ManagedConnection {
 
-    private static Logger log = Logger.getLogger(SampleManagedConnection.class.getName());
+    private static Logger log = Logger.getLogger(SlackManagedConnection.class.getName());
 
     private PrintWriter logwriter;
 
-    private SampleManagedConnectionFactory mcf;
+    private SlackManagedConnectionFactory mcf;
 
     private List<ConnectionEventListener> listeners;
 
-    private SampleConnectionImpl connection;
+    private SlackConnectionImpl connection;
 
-    public SampleManagedConnection(SampleManagedConnectionFactory mcf) {
+    public SlackManagedConnection(SlackManagedConnectionFactory mcf) {
         this.mcf = mcf;
         this.logwriter = null;
         this.listeners = Collections.synchronizedList(new ArrayList<ConnectionEventListener>(1));
@@ -58,7 +58,7 @@ public class SampleManagedConnection implements ManagedConnection {
     public Object getConnection(Subject subject,
                                 ConnectionRequestInfo cxRequestInfo) throws ResourceException {
         log.finest("getConnection()");
-        connection = new SampleConnectionImpl(this, mcf);
+        connection = new SlackConnectionImpl(this, mcf);
         return connection;
     }
 
@@ -68,10 +68,10 @@ public class SampleManagedConnection implements ManagedConnection {
         if (connection == null)
             throw new ResourceException("Null connection handle");
 
-        if (!(connection instanceof SampleConnectionImpl))
+        if (!(connection instanceof SlackConnectionImpl))
             throw new ResourceException("Wrong connection handle");
 
-        this.connection = (SampleConnectionImpl) connection;
+        this.connection = (SlackConnectionImpl) connection;
     }
 
     public void cleanup() throws ResourceException {
@@ -99,7 +99,7 @@ public class SampleManagedConnection implements ManagedConnection {
         listeners.remove(listener);
     }
 
-    void closeHandle(SampleConnection handle) {
+    void closeHandle(SlackConnection handle) {
         ConnectionEvent event = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
         event.setConnectionHandle(handle);
         for (ConnectionEventListener cel : listeners) {
@@ -127,13 +127,13 @@ public class SampleManagedConnection implements ManagedConnection {
 
     public ManagedConnectionMetaData getMetaData() throws ResourceException {
         log.finest("getMetaData()");
-        return new SampleManagedConnectionMetaData();
+        return new SlackManagedConnectionMetaData();
     }
 
     void sendMessage(final String channel, final String message) {
         log.finest("sendMessage()");
 
-        final SampleResourceAdapter resourceAdapter = (SampleResourceAdapter) mcf.getResourceAdapter();
+        final SlackResourceAdapter resourceAdapter = (SlackResourceAdapter) mcf.getResourceAdapter();
         resourceAdapter.sendMessage(channel, message);
     }
 }
