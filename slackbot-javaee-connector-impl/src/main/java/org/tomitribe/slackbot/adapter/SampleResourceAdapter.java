@@ -16,79 +16,125 @@
  */
 package org.tomitribe.slackbot.adapter;
 
-import org.tomitribe.slackbot.api.Execute;
+import com.fasterxml.jackson.databind.JsonNode;
+import flowctrl.integration.slack.SlackClientFactory;
+import flowctrl.integration.slack.rtm.Event;
+import flowctrl.integration.slack.rtm.EventListener;
+import flowctrl.integration.slack.rtm.SlackRealTimeMessagingClient;
+import flowctrl.integration.slack.type.Authentication;
+import flowctrl.integration.slack.type.Presence;
+import flowctrl.integration.slack.webapi.SlackWebApiClient;
+import flowctrl.integration.slack.webapi.method.chats.ChatPostMessageMethod;
+import org.tomitribe.crest.Main;
+import org.tomitribe.crest.cmds.Cmd;
+import org.tomitribe.crest.cmds.processors.Commands;
+import org.tomitribe.crest.cmds.targets.Target;
+import org.tomitribe.crest.environments.Environment;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ConfigProperty;
 import javax.resource.spi.Connector;
 import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.endpoint.MessageEndpoint;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.resource.spi.work.Work;
+import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Connector(description = "Sample Resource Adapter", displayName = "Sample Resource Adapter", eisType = "Sample Resource Adapter", version = "1.0")
-public class SampleResourceAdapter implements ResourceAdapter {
-
+public class    SampleResourceAdapter implements ResourceAdapter, EventListener {
     final Map<SampleActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<SampleActivationSpec, EndpointTarget>();
 
+    @ConfigProperty
+    private String token;
+
+    private SlackRealTimeMessagingClient slackRealTimeMessagingClient;
+    private SlackWebApiClient webApiClient;
+    private Main main;
+    private WorkManager workManager;
+    private String user;
+    private String userId;
+
     public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
+        workManager = bootstrapContext.getWorkManager();
+        webApiClient = SlackClientFactory.createWebApiClient(token);
+        slackRealTimeMessagingClient = SlackClientFactory.createSlackRealTimeMessagingClient(token);
+
+        final Authentication authentication = webApiClient.auth();
+        user = authentication.getUser();
+        userId = authentication.getUser_id();
+
+        webApiClient.setPresenceUser(Presence.AUTO);
+
+        slackRealTimeMessagingClient.addListener(Event.MESSAGE, this);
+        slackRealTimeMessagingClient.connect();
+        main = new Main();
     }
 
     public void stop() {
+        webApiClient.setPresenceUser(Presence.AWAY);
     }
 
     public void endpointActivation(final MessageEndpointFactory messageEndpointFactory, final ActivationSpec activationSpec)
             throws ResourceException
     {
-        final SampleActivationSpec sampleActivationSpec = (SampleActivationSpec) activationSpec;
+        final SampleActivationSpec telnetActivationSpec = (SampleActivationSpec) activationSpec;
 
-        try {
-            final MessageEndpoint messageEndpoint = messageEndpointFactory.createEndpoint(null);
+        workManager.scheduleWork(new Work() {
 
-            final Class<?> endpointClass = sampleActivationSpec.getBeanClass() != null ? sampleActivationSpec
-                    .getBeanClass() : messageEndpointFactory.getEndpointClass();
+            @Override
+            public void run() {
+                try {
+                    final MessageEndpoint messageEndpoint = messageEndpointFactory.createEndpoint(null);
 
-            final List<Method> methodList = new ArrayList<>();
-            final Method[] methods = endpointClass.getMethods();
-            for (final Method method : methods) {
-                if (! Modifier.isPublic(method.getModifiers())) {
-                    continue;
-                }
+                    final EndpointTarget target = new EndpointTarget(messageEndpoint);
+                    final Class<?> endpointClass = telnetActivationSpec.getBeanClass() != null ? telnetActivationSpec
+                            .getBeanClass() : messageEndpointFactory.getEndpointClass();
 
-                if (method.getAnnotation(Execute.class) == null) {
-                    continue;
-                }
+                    target.commands.addAll(Commands.get(endpointClass, target, null).values());
 
-                if (method.getParameters().length == 1
-                        && String.class.equals(method.getParameters()[0].getType())) {
+                    for (Cmd cmd : target.commands) {
+                        main.add(cmd);
+                    }
 
-                    methodList.add(method);
+                    targets.put(telnetActivationSpec, target);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
-            final EndpointTarget target = new EndpointTarget(messageEndpoint, methodList.toArray(new Method[methodList.size()]));
-            targets.put(sampleActivationSpec, target);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void release() {
+            }
+
+        });
+
     }
 
     public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
-        final SampleActivationSpec sampleActivationSpec = (SampleActivationSpec) activationSpec;
+        final SampleActivationSpec telnetActivationSpec = (SampleActivationSpec) activationSpec;
 
-        final EndpointTarget endpointTarget = targets.get(sampleActivationSpec);
+        final EndpointTarget endpointTarget = targets.get(telnetActivationSpec);
         if (endpointTarget == null) {
             throw new IllegalStateException("No EndpointTarget to undeploy for ActivationSpec " + activationSpec);
+        }
+
+        final List<Cmd> commands = telnetActivationSpec.getCommands();
+        for (Cmd command : commands) {
+            main.remove(command);
         }
 
         endpointTarget.messageEndpoint.release();
@@ -98,37 +144,103 @@ public class SampleResourceAdapter implements ResourceAdapter {
         return new XAResource[0];
     }
 
-    public void sendMessage(final String message) {
-        final Collection<EndpointTarget> endpoints = this.targets.values();
-        for (final EndpointTarget endpoint : endpoints) {
-            endpoint.invoke(message);
+    public void sendMessage(final String channel, final String message) {
+        ChatPostMessageMethod postMessage = new ChatPostMessageMethod(channel, message);
+        postMessage.setUsername(user);
+        webApiClient.postMessage(postMessage);
+    }
+
+    @Override
+    public void handleMessage(final JsonNode jsonNode) {
+
+        String commandLine = jsonNode.get("text").textValue();
+        final String userPrefix = "<@" + userId + ">";
+        if (! commandLine.startsWith(userPrefix)) {
+            return;
+        }
+
+        // chop off the user: prefix
+        commandLine = commandLine.replaceAll("^" + userPrefix + ":?\\s*", "");
+
+        final String channel = jsonNode.get("channel").textValue();
+
+        String[] args;
+        final Arguments[] arguments = ArgumentsParser.parse(commandLine);
+        if (arguments == null || arguments.length == 0) {
+            args = new String[] { "help" };
+        } else {
+            args = arguments[0].get();
+        }
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final PrintStream ps = new PrintStream(os);
+        final Environment environment = new Environment() {
+            @Override
+            public PrintStream getOutput() {
+                return ps;
+            }
+
+            @Override
+            public PrintStream getError() {
+                return ps;
+            }
+
+            @Override
+            public InputStream getInput() {
+                return null;
+            }
+
+            @Override
+            public Properties getProperties() {
+                return System.getProperties();
+            }
+        };
+
+        try {
+            main.main(environment, args);
+        } catch (Exception e) {
+            e.printStackTrace(ps);
+        }
+
+        ChatPostMessageMethod postMessage = new ChatPostMessageMethod(channel, new String(os.toByteArray()));
+        postMessage.setUsername(user);
+        webApiClient.postMessage(postMessage);
+    }
+
+    private static class EndpointTarget implements Target {
+        private final MessageEndpoint messageEndpoint;
+        private final List<Cmd> commands = new ArrayList<Cmd>();
+
+        public EndpointTarget(MessageEndpoint messageEndpoint) {
+            this.messageEndpoint = messageEndpoint;
+        }
+
+        @Override
+        public Object invoke(Method method, Object... objects) 
+                throws InvocationTargetException, IllegalAccessException
+        {
+
+            try {
+                try {
+                    messageEndpoint.beforeDelivery(method);
+
+                    return method.invoke(messageEndpoint, objects);
+                } finally {
+                    messageEndpoint.afterDelivery();
+                }
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            } catch (ResourceException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public static class EndpointTarget {
-        private final MessageEndpoint messageEndpoint;
-        private final Method[] methods;
+    public String getToken() {
+        return token;
+    }
 
-        public EndpointTarget(final MessageEndpoint messageEndpoint, final Method[] methods) {
-            this.messageEndpoint = messageEndpoint;
-            this.methods = methods;
-        }
-
-        public void invoke(final String message) {
-            for (final Method method : methods) {
-                try {
-                    try {
-                        messageEndpoint.beforeDelivery(method);
-                        method.invoke(messageEndpoint, message);
-                    } catch (InvocationTargetException | IllegalAccessException e) {
-                        // ignore
-                    } finally {
-                        messageEndpoint.afterDelivery();
-                    }
-                } catch (NoSuchMethodException | ResourceException e) {
-                    // ignore
-                }
-            }
-        }
+    public void setToken(final String token) {
+        this.token = token;
     }
 }

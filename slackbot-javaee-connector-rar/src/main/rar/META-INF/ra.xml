@@ -29,16 +29,15 @@
     <resourceadapter>
         <resourceadapter-class>org.tomitribe.slackbot.adapter.SampleResourceAdapter</resourceadapter-class>
         <config-property>
-            <config-property-name>interval</config-property-name>
-            <config-property-type>int</config-property-type>
-            <config-property-value>15</config-property-value>
+            <config-property-name>token</config-property-name>
+            <config-property-type>String</config-property-type>
         </config-property>
         <outbound-resourceadapter>
             <connection-definition>
                 <managedconnectionfactory-class>org.tomitribe.slackbot.adapter.SampleManagedConnectionFactory</managedconnectionfactory-class>
-                <connectionfactory-interface>org.tomitribe.connector.starter.api.SampleConnectionFactory</connectionfactory-interface>
+                <connectionfactory-interface>org.tomitribe.slackbot.api.SampleConnectionFactory</connectionfactory-interface>
                 <connectionfactory-impl-class>org.tomitribe.slackbot.adapter.SampleConnectionFactoryImpl</connectionfactory-impl-class>
-                <connection-interface>org.tomitribe.connector.starter.api.SampleConnection</connection-interface>
+                <connection-interface>org.tomitribe.slackbot.api.SampleConnection</connection-interface>
                 <connection-impl-class>org.tomitribe.slackbot.adapter.SampleConnectionImpl</connection-impl-class>
             </connection-definition>
             <transaction-support>NoTransaction</transaction-support>
@@ -47,7 +46,7 @@
         <inbound-resourceadapter>
             <messageadapter>
                 <messagelistener>
-                    <messagelistener-type>org.tomitribe.connector.starter.api.InboundListener</messagelistener-type>
+                    <messagelistener-type>org.tomitribe.slackbot.api.InboundListener</messagelistener-type>
                     <activationspec>
                         <activationspec-class>org.tomitribe.slackbot.adapter.SampleActivationSpec</activationspec-class>
                     </activationspec>

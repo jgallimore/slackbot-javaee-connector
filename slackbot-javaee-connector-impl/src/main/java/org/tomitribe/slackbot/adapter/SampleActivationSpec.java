@@ -16,6 +16,7 @@
  */
 package org.tomitribe.slackbot.adapter;
 
+import org.tomitribe.crest.cmds.Cmd;
 import org.tomitribe.slackbot.api.InboundListener;
 
 import javax.resource.ResourceException;
@@ -23,12 +24,19 @@ import javax.resource.spi.Activation;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Activation(messageListeners = InboundListener.class)
 public class SampleActivationSpec implements ActivationSpec {
 
     private ResourceAdapter resourceAdapter;
     private Class beanClass;
+    private List<Cmd> commands = new ArrayList<Cmd>();
+
+    public List<Cmd> getCommands() {
+        return commands;
+    }
 
     public Class getBeanClass() {
         return beanClass;

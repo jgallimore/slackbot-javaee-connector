@@ -27,6 +27,7 @@ import javax.resource.ResourceException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 
 @Singleton
@@ -37,12 +38,13 @@ public class Sender {
     @Resource
     private SampleConnectionFactory cf;
 
+    @Path("{channel}")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    public void sendMessage(final String message) {
+    public void sendMessage(@PathParam("channel") final String channel, final String message) {
         try {
             final SampleConnection connection = cf.getConnection();
-            connection.sendMessage(message);
+            connection.sendMessage(channel, message);
             connection.close();
         } catch (ResourceException e) {
             // ignore

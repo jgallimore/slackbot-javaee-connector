@@ -35,6 +35,7 @@
     <version.shrinkwrap.shrinkwrap>1.0.1</version.shrinkwrap.shrinkwrap>
     <version.tomee>1.7.2</version.tomee>
     <version.openejb>4.7.2</version.openejb>
+    <version.crest>0.3</version.crest>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
   </properties>
 
@@ -46,10 +47,35 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
   </repositories>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.tomitribe</groupId>
+        <artifactId>tomitribe-crest</artifactId>
+        <version>${version.crest}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tomitribe</groupId>
+        <artifactId>tomitribe-crest-api</artifactId>
+        <version>${version.crest}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.tomitribe</groupId>
+        <artifactId>tomitribe-util</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sshd</groupId>
+        <artifactId>sshd-core</artifactId>
+        <version>0.9.0</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>

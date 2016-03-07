@@ -20,7 +20,7 @@
 package org.tomitribe.slackbot.api;
 
 public interface SampleConnection {
-    public void sendMessage(final String message);
+    public void sendMessage(final String channel, final String message);
 
     public void close();
 }

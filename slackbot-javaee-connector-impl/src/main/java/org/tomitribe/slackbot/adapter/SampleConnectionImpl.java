@@ -34,8 +34,8 @@ public class SampleConnectionImpl implements SampleConnection {
         this.mcf = mcf;
     }
 
-    public void sendMessage(final String message) {
-        mc.sendMessage(message);
+    public void sendMessage(final String channel, final String message) {
+        mc.sendMessage(channel, message);
     }
 
     public void close() {

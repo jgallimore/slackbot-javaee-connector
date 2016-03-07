@@ -16,21 +16,41 @@
  */
 package org.superbiz;
 
-import javax.annotation.Resource;
-import javax.ejb.MessageDriven;
-import javax.ejb.MessageDrivenContext;
-
-import org.tomitribe.slackbot.api.Execute;
+import org.tomitribe.crest.api.Command;
 import org.tomitribe.slackbot.api.InboundListener;
+import org.tomitribe.util.PrintString;
+
+import javax.ejb.MessageDriven;
+import java.util.Map;
+import java.util.TreeSet;
 
 @MessageDriven(name = "Receiver")
-public class Receiver implements InboundListener {
+public class SystemBean implements InboundListener {
 
-    @Resource
-    private MessageDrivenContext context;
-    
-    @Execute
-    public void receive(final String message) {
-        System.out.println(message);
+    @Command
+    public String date() {
+        return String.format("%tc", System.currentTimeMillis());
+    }
+
+    @Command
+    public String env() {
+        final PrintString out = new PrintString();
+
+        final Map<String, String> env = System.getenv();
+
+        for (String key : new TreeSet<String>(env.keySet())) {
+            out.printf("%s = %s%n", key, env.get(key));
+        }
+
+        return out.toString();
+    }
+
+    @Command
+    public String properties() {
+        final PrintString out = new PrintString();
+
+        System.getProperties().list(out);
+
+        return out.toString();
     }
 }

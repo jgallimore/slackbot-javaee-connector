@@ -130,10 +130,10 @@ public class SampleManagedConnection implements ManagedConnection {
         return new SampleManagedConnectionMetaData();
     }
 
-    void sendMessage(final String message) {
+    void sendMessage(final String channel, final String message) {
         log.finest("sendMessage()");
 
         final SampleResourceAdapter resourceAdapter = (SampleResourceAdapter) mcf.getResourceAdapter();
-        resourceAdapter.sendMessage(message);
+        resourceAdapter.sendMessage(channel, message);
     }
 }
